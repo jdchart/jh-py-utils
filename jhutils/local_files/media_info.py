@@ -42,11 +42,11 @@ def get_video_info(file_path):
         "height" : height,
         # "video_frames" : video.reader.nframes,
         "video_frame_rate" : video.fps,
-        "video_codec" : video.reader.codec,
+        # "video_codec" : video.reader.codec,
         "audio_duration_ms" : video.audio.duration / 1000,
         "audio_channels" : video.audio.nchannels,
         "audio_frame_rate" : video.audio.fps,
         "audio_sample_width" : video.audio.nbytes // video.audio.nchannels ,
-        "audio_frames" : video.audio.reader.nframes,
+        # "audio_frames" : video.audio.reader.nframes,
     }
     
