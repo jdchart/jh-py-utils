@@ -1,5 +1,5 @@
 from PIL import Image
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 from pydub import AudioSegment
 
 def get_image_info(file_path):
