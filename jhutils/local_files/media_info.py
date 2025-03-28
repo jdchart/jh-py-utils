@@ -26,7 +26,7 @@ def get_image_info(file_path):
 def get_audio_info(file_path):
     audio = AudioSegment.from_file(file_path)
     return {
-        "duration_ms" : len(audio),
+        "duration" : len(audio),
         "channels" : audio.channels,
         "frame_rate" : audio.frame_rate,
         "sample_width" :audio.sample_width,
@@ -56,7 +56,7 @@ def get_video_info(file_path):
     for track in media_info.tracks:
         if track.track_type == 'Video':
             return {
-                "video_duration_ms": track.duration,
+                "duration": track.duration,
                 "width": track.width,
                 "height": track.height,
                 "video_frame_rate": track.frame_rate,
