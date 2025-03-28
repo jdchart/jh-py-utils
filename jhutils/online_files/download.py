@@ -3,7 +3,7 @@ import requests
 import zipfile
 
 def download(url, **kwargs):
-    if kwargs.get("dir", None):
+    if kwargs.get("dir", None) == None:
         dl_location = os.path.join(os.getcwd(), os.path.basename(url))
     else:
         dl_location = os.path.join(kwargs.get("dir"), os.path.basename(url))
