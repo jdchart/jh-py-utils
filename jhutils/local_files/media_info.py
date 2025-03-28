@@ -40,7 +40,7 @@ def get_video_info(file_path):
         "video_duration_ms" : video.duration / 1000,
         "width" : width,
         "height" : height,
-        "video_frames" : video.reader.nframes,
+        # "video_frames" : video.reader.nframes,
         "video_frame_rate" : video.fps,
         "video_codec" : video.reader.codec,
         "audio_duration_ms" : video.audio.duration / 1000,
