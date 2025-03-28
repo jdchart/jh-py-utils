@@ -56,7 +56,7 @@ def get_video_info(file_path):
     for track in media_info.tracks:
         if track.track_type == 'Video':
             return {
-                "video_duration_ms": track.duration / 1000,
+                "video_duration_ms": track.duration,
                 "width": track.width,
                 "height": track.height,
                 "video_frame_rate": track.frame_rate,
