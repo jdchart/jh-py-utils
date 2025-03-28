@@ -5,7 +5,13 @@ long_description= """
 # jhutils
 """
 
-required = []
+required = [
+    "requests",
+    "pillow",
+    "pymediainfo",
+    "moviepy",
+    "pydub"
+]
 
 setup(
     name="jhutils",
