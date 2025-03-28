@@ -6,7 +6,7 @@ def download(url, **kwargs):
     if kwargs.get("dir", None):
         dl_location = os.path.join(os.getcwd(), os.path.basename(url))
     else:
-        dl_location = os.path.join(os.getcwd(), kwargs.get("dir"), os.path.basename(url))
+        dl_location = os.path.join(kwargs.get("dir"), os.path.basename(url))
     _download_online_file(url, dl_location, kwargs.get("range", None))
     
 def _download_online_file(url, path, range):
