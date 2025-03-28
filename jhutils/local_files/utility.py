@@ -1,18 +1,24 @@
 import os
 import zipfile
 
-def collect_files(path, acceptedFormats = []):
+def collect_files(path, acceptedFormats = [], recursive = True):
     """Collect all files of accepted format in a given directory."""
-
+    
+    acceptedFormatsLower = {ext.lower() for ext in acceptedFormats}
     finalList = []
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            if len(acceptedFormats) > 0:
-                extension = os.path.splitext(file)[1][1:]
-                if extension in acceptedFormats:
+    
+    if recursive:
+        for root, _, files in os.walk(path):
+            for file in files:
+                if not acceptedFormats or os.path.splitext(file)[1][1:].lower() in acceptedFormatsLower:
                     finalList.append(os.path.join(root, file))
-            else:
-                finalList.append(os.path.join(root, file))
+    else:
+        for file in os.listdir(path):
+            full_path = os.path.join(path, file)
+            if os.path.isfile(full_path):
+                if not acceptedFormats or os.path.splitext(file)[1][1:].lower() in acceptedFormatsLower:
+                    finalList.append(full_path)
+    
     return finalList
 
 def zip_folder(path, zip_path):
