@@ -9,18 +9,11 @@ def get_image_info(file_path):
         exif_data = img._getexif()
         return {
             "width": width,
-            "height": height,
-            "exif_data": exif_data,
-            "color_mode" : img.mode,
-            "bit_depth" : img.bits
+            "height": height
+            #"exif_data": exif_data,
+            #"color_mode" : img.mode,
+            #"bit_depth" : img.bits
         }
-    
-    with Image.open(file_object.path) as img:
-        width, height = img.size
-        props["width"] = width
-        props["height"] = height
-        props["color_mode"] = img.mode
-        props["bit_depth"] = img.bits
 
     
 def get_audio_info(file_path):
