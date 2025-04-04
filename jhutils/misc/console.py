@@ -11,6 +11,8 @@ def print_progress_bar_colab(progress, total, post_message="", length=50):
     
     if progress == total:
         print()  # Move to a new line at the end
+
+        
 def print_progress_bar(progress, total, post_message, length = 50):
     percent = progress / total
     filled_length = int(length * percent)
