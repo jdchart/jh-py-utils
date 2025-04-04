@@ -8,6 +8,7 @@ def download(url, **kwargs):
     else:
         dl_location = os.path.join(kwargs.get("dir"), os.path.basename(url))
     _download_online_file(url, dl_location, kwargs.get("range", None))
+    return dl_location
     
 def _download_online_file(url, path, range):
     """Download a file to base colab directory."""
