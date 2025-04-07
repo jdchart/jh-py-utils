@@ -9,7 +9,7 @@ required = [
     "requests",
     "pillow",
     "pymediainfo",
-    #"moviepy",
+    "yt-dlp",
     "pydub"
 ]
 
