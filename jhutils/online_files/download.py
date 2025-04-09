@@ -46,7 +46,11 @@ def dl_streaming_video(url, path):
         'progress_hooks': [hook],
         'logger': QuietLogger(),
         'quiet': True, 
-        'no_warnings': True
+        'no_warnings': True,
+        'postprocessors': [{
+            'key': 'FFmpegVideoConvertor',
+            'preferedformat': 'mp4'
+        }]
     }
 
     with YoutubeDL(ydl_opts) as ydl:
