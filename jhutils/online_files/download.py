@@ -4,6 +4,7 @@ import zipfile
 from requests.exceptions import ChunkedEncodingError, ConnectionError
 import time
 import re
+import pathlib
 from yt_dlp import YoutubeDL
 
 def download(url, **kwargs):
@@ -20,25 +21,38 @@ def download(url, **kwargs):
         _download_online_file(url, dl_location, kwargs.get("range", None))
     return dl_location
 
+class QuietLogger:
+    def debug(self, msg):
+        pass
+    def warning(self, msg):
+        pass
+    def error(self, msg):
+        pass
+
 def dl_streaming_video(url, path):
-    downloaded_path = None
+    final_file = None
 
     def hook(d):
-        nonlocal downloaded_path
+        nonlocal final_file
         if d['status'] == 'finished':
-            downloaded_path = d['filename']
+            # Construct final merged filename manually
+            base = pathlib.Path(d['filename']).with_suffix('')  # remove extension
+            final_file = str(base.with_suffix('.mp4'))  # add correct merged format
 
     ydl_opts = {
         'format': 'bestvideo+bestaudio/best',
         'outtmpl': f'{path}/%(title)s.%(ext)s',
         'merge_output_format': 'mp4',
-        'progress_hooks': [hook]
+        'progress_hooks': [hook],
+        'logger': QuietLogger(),
+        'quiet': True, 
+        'no_warnings': True
     }
 
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
-    return downloaded_path
+    return final_file
 
 def _is_youtube_video_regex(url):
     YOUTUBE_VIDEO_REGEX = re.compile(
