@@ -3,14 +3,61 @@ import requests
 import zipfile
 from requests.exceptions import ChunkedEncodingError, ConnectionError
 import time
+import re
+from yt_dlp import YoutubeDL
 
 def download(url, **kwargs):
     if kwargs.get("dir", None) == None:
         dl_location = os.path.join(os.getcwd(), os.path.basename(url))
     else:
         dl_location = os.path.join(kwargs.get("dir"), os.path.basename(url))
-    _download_online_file(url, dl_location, kwargs.get("range", None))
+    
+    if _is_youtube_video_regex(url):
+        dl_location = dl_streaming_video(url, os.path.dirname(dl_location))
+    elif _is_peertube_video_regex(url):
+        dl_location = dl_streaming_video(url, os.path.dirname(dl_location))
+    else:
+        _download_online_file(url, dl_location, kwargs.get("range", None))
     return dl_location
+
+def dl_streaming_video(url, path):
+    downloaded_path = None
+
+    def hook(d):
+        nonlocal downloaded_path
+        if d['status'] == 'finished':
+            downloaded_path = d['filename']
+
+    ydl_opts = {
+        'format': 'bestvideo+bestaudio/best',
+        'outtmpl': f'{path}/%(title)s.%(ext)s',
+        'merge_output_format': 'mp4',
+        'progress_hooks': [hook]
+    }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+    return downloaded_path
+
+def _is_youtube_video_regex(url):
+    YOUTUBE_VIDEO_REGEX = re.compile(
+        r'(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})'
+    )
+    return bool(YOUTUBE_VIDEO_REGEX.match(url))
+
+def _is_peertube_video_regex(url):
+    PEERTUBE_REGEX_1 = re.compile(
+        r'https?://[^/]+/videos/watch/[\w\-]+'
+    )
+    PEERTUBE_REGEX_2 = re.compile(
+        r'https?://[^/]+/w/[\w\-]+'
+    )
+    PEERTUBE_REGEX_3 = re.compile(
+        r'https?://[^/]+/videos/embed/[\w\-]+'
+    )
+
+    return bool(PEERTUBE_REGEX_1.match(url) or PEERTUBE_REGEX_2.match(url) or PEERTUBE_REGEX_3.match(url))
     
 # def _download_online_file(url, path, range):
 #     """Download a file to base colab directory."""
