@@ -15,11 +15,12 @@ def download(url, **kwargs):
         dl_location = os.path.join(kwargs.get("dir"), os.path.basename(url))
     
     if _is_youtube_video_regex(url):
-        dl_location = dl_streaming_video(url, os.path.dirname(dl_location))
+        dl_location = dl_youtube_video(url, os.path.dirname(dl_location))
     elif _is_peertube_video_regex(url):
-        dl_location = dl_streaming_video(url, os.path.dirname(dl_location))
+        dl_location = dl_peertube_video(url, os.path.dirname(dl_location))
     else:
         _download_online_file(url, dl_location, kwargs.get("range", None))
+    
     return dl_location
 
 class QuietLogger:
@@ -30,58 +31,15 @@ class QuietLogger:
     def error(self, msg):
         pass
 
-# def dl_streaming_video(url, path):
-#     final_file = None
-
-#     def hook(d):
-#         nonlocal final_file
-#         if d['status'] == 'finished':
-#             # Construct final merged filename manually
-#             base = pathlib.Path(d['filename']).with_suffix('')  # remove extension
-#             final_file = str(base.with_suffix('.mp4'))  # add correct merged format
-
-#     ydl_opts = {
-#         'format': 'bestvideo+bestaudio/best',
-#         'outtmpl': f'{path}/%(title)s.%(ext)s',
-#         'merge_output_format': 'mp4',
-#         'progress_hooks': [hook],
-#         'logger': QuietLogger(),
-#         'quiet': True, 
-#         'no_warnings': True,
-#         'postprocessors': [{
-#             'key': 'FFmpegVideoConvertor',
-#             'preferedformat': 'mp4'
-#         }]
-#     }
-
-#     with YoutubeDL(ydl_opts) as ydl:
-#         ydl.download([url])
-
-#     return final_file
-def dl_streaming_video(url, path):
+def dl_peertube_video(url, path):
     final_file = None
 
     def hook(d):
         nonlocal final_file
         if d['status'] == 'finished':
-            downloaded_file = pathlib.Path(d['filename'])
-            reencoded_file = downloaded_file.with_suffix('.converted.mp4')
-
-            # ffmpeg command to re-encode into macOS-compatible format
-            subprocess.run([
-                'ffmpeg',
-                '-i', str(downloaded_file),
-                '-c:v', 'libx264',
-                '-c:a', 'aac',
-                '-strict', 'experimental',
-                '-movflags', '+faststart',
-                str(reencoded_file)
-            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-            # Optional: delete original file after re-encode
-            downloaded_file.unlink(missing_ok=True)
-
-            final_file = str(reencoded_file)
+            # Construct final merged filename manually
+            base = pathlib.Path(d['filename']).with_suffix('')  # remove extension
+            final_file = str(base.with_suffix('.mp4'))  # add correct merged format
 
     ydl_opts = {
         'format': 'bestvideo+bestaudio/best',
@@ -89,14 +47,58 @@ def dl_streaming_video(url, path):
         'merge_output_format': 'mp4',
         'progress_hooks': [hook],
         'logger': QuietLogger(),
-        'quiet': True,
-        'no_warnings': True
+        'quiet': True, 
+        'no_warnings': True,
+        'postprocessors': [{
+            'key': 'FFmpegVideoConvertor',
+            'preferedformat': 'mp4'
+        }]
     }
 
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
     return final_file
+
+def dl_youtube_video(url, path):
+    path = pathlib.Path(path)
+    path.mkdir(parents=True, exist_ok=True)
+
+    # This will hold the output file name
+    output_template = path / '%(title)s.%(ext)s'
+    final_file = None
+
+    ydl_opts = {
+        'format': 'bestvideo+bestaudio/best',
+        'outtmpl': str(output_template),
+        'merge_output_format': 'mkv',  # use .mkv to preserve all streams
+        'quiet': True,
+        'no_warnings': True,
+        'logger': None,  # Disables yt-dlp's internal logger completely
+    }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=True)
+        downloaded_file = pathlib.Path(ydl.prepare_filename(info)).with_suffix('.mkv')
+
+    # Re-encode to a truly compatible MP4 (H.264 + AAC)
+    reencoded_file = downloaded_file.with_suffix('.mp4')
+
+    # Suppress ffmpeg output by redirecting stdout and stderr to DEVNULL
+    subprocess.run([
+        'ffmpeg',
+        '-y',
+        '-i', str(downloaded_file),
+        '-c:v', 'libx264',
+        '-c:a', 'aac',
+        '-movflags', '+faststart',
+        str(reencoded_file)
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+    # Optionally delete original
+    downloaded_file.unlink()
+
+    return str(reencoded_file)
 
 def _is_youtube_video_regex(url):
     YOUTUBE_VIDEO_REGEX = re.compile(
