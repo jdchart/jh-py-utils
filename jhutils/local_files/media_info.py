@@ -10,6 +10,8 @@ import hashlib
 
 def get_file_info(file_path, private = False):
     info = {}
+    info['basename'] = os.path.basename(file_path)
+    info['dir'] = os.path.dirname(file_path)
     info['absolute_path'] = os.path.abspath(file_path)
     info['size_bytes'] = os.path.getsize(file_path)
     info['created'] = time.ctime(os.path.getctime(file_path))
@@ -38,6 +40,7 @@ def get_file_info(file_path, private = False):
 
     if private:
         info.pop('absolute_path', None)
+        info.pop('dir', None)
         info.pop('created', None)
         info.pop('modified', None)
         info.pop('accessed', None)
