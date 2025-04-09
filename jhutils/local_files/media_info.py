@@ -8,7 +8,7 @@ import time
 import mimetypes
 import hashlib
 
-def get_file_info(file_path):
+def get_file_info(file_path, private = False):
     info = {}
     info['absolute_path'] = os.path.abspath(file_path)
     info['size_bytes'] = os.path.getsize(file_path)
@@ -35,6 +35,15 @@ def get_file_info(file_path):
 
     for algo in ['md5', 'sha1', 'sha256', 'sha512']:
         info[f'{algo}_hash'] = get_hash(file_path, algo)
+
+    if private:
+        info.pop('absolute_path', None)
+        info.pop('created', None)
+        info.pop('modified', None)
+        info.pop('accessed', None)
+        for key in list(info):
+            if key.endswith('_hash'):
+                info.pop(key)
 
     return info
 
