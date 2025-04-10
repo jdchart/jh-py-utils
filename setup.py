@@ -10,7 +10,8 @@ required = [
     "pillow",
     "pymediainfo",
     "yt-dlp",
-    "pydub"
+    "pydub",
+    "pyppeteer"
 ]
 
 setup(
