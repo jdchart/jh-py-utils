@@ -8,9 +8,6 @@ def network_to_image(graph, out_path, **kwargs) -> dict:
     gCopy = copy.copy(graph)
     pos = _apply_layout(gCopy, kwargs.get("pos_algo", "spring"))
 
-    print("pos:")
-    print(pos)
-
     imgWidth = kwargs.get("width", 1000)
     imgHeight = kwargs.get("height", 1000)
     sizeMinMax = kwargs.get("size_min_max", [int(math.floor(imgWidth / 200)), int(math.floor(imgWidth / 50))])
@@ -31,16 +28,13 @@ def network_to_image(graph, out_path, **kwargs) -> dict:
     # Process minMax for x y and collect neighbours.
     _parseMinMaxAndNeighbors(gCopy, pos, minMaxX, minMaxY, minMaxSize, nodeInfo)
 
-    print("nodeinfo:")
-    print(nodeInfo)
-
     # Rescale data and prepare return dict.
     outData = {"meta" : {"width" : imgWidth, "height" : imgHeight, "fileformat" : "png"}}    
     _rescaleData(pos, minMaxX, minMaxY, minMaxSize, nodeInfo, sizeMinMax, imgWidth, imgHeight, outData)
 
     # Draw edges:
 
-    for source_id, target_id in G.edges():
+    for source_id, target_id in gCopy.edges():
         sourceInfo = outData[source_id]
         targetInfo = outData[target_id]
         draw.line(
